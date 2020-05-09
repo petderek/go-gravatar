@@ -2,7 +2,9 @@ package go_gravatar
 
 import (
 	"bytes"
+	"crypto"
 	"crypto/md5"
+	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
 	"net/url"
@@ -27,16 +29,27 @@ type Gravatar struct {
 	Size           int
 	DefaultPicture string
 	BaseDomain     *url.URL
+	Hash           crypto.Hash
 }
 
 // hash does the following:
 // 1. trim whitespace
 // 2. convert everything to lowercase
-// 3. calculate the md5sum, which returns a [16]byte
+// 3. calculate the hash, which returns a byte array
 // 5. convert the byte array to a slice [:]
-func (g *Gravatar) hash(email []byte) []byte {
-	data := md5.Sum(bytes.ToLower(bytes.TrimSpace(email)))
-	return data[:]
+func (g *Gravatar) hash(email []byte) (data []byte) {
+	sanitized := bytes.ToLower(bytes.TrimSpace(email))
+	switch g.Hash {
+	case crypto.SHA256:
+		d := sha256.Sum256(sanitized)
+		data = d[:]
+	case crypto.MD5, 0:
+		d := md5.Sum(sanitized)
+		data = d[:]
+	default:
+		panic("hash not supported")
+	}
+	return
 }
 
 // HashString returns a string-backed md5sum of the email address, using Hash(email []byte)

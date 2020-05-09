@@ -1,13 +1,13 @@
 package main
 
 import (
+	"crypto"
 	"flag"
 	"fmt"
-	"net/http"
-	"os"
-
 	"io/ioutil"
+	"net/http"
 	"net/url"
+	"os"
 
 	. "github.com/petderek/go-gravatar"
 )
@@ -17,6 +17,7 @@ var (
 	save   = flag.String("save", "", "save the photo saves the content to the filename specified. implies check")
 	size   = flag.Int("size", 0, "the optional size in pixels")
 	domain = flag.String("domain", "", "the optional base domain to use instead of gravatar, such as http://cdn.libravatar.org")
+	sha256 = flag.Bool("sha256", false, "use sha256 instead of md5, for libravatar and friends")
 )
 
 // gravatar's api returns a silhouette by default. passing this arg forces a 404 if an image isn't found
@@ -42,6 +43,10 @@ func main() {
 		Size:           *size,
 		DefaultPicture: respondWith404,
 		BaseDomain:     location,
+	}
+
+	if *sha256 {
+		g.Hash = crypto.SHA256
 	}
 
 	result := g.AvatarUrl(flag.Arg(0))

@@ -19,7 +19,6 @@ grav -check derek@example.com && echo YES || echo NO
 
 ```
 grav -save derek.jpeg derek@example.com
-ifranview derek.jpeg
 ```
 
 ![derek@example.com](https://gravatar.com/avatar/631f0aac0a664c033945d4cb2573f931)

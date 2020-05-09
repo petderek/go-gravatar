@@ -1,8 +1,9 @@
 package go_gravatar
 
 import (
-	"testing"
+	"crypto"
 	"net/url"
+	"testing"
 )
 
 var (
@@ -50,7 +51,7 @@ func TestAvatarUrlWithParams(t *testing.T) {
 
 func TestAvatarUrlWithNewBase(t *testing.T) {
 	domain, _ := url.Parse("https://example.com")
-	otherG := Gravatar {
+	otherG := Gravatar{
 		BaseDomain: domain,
 	}
 
@@ -60,4 +61,33 @@ func TestAvatarUrlWithNewBase(t *testing.T) {
 	if result != expected {
 		t.Errorf("For input (%s) we expected (%s), but actually got (%s).", input, expected, result)
 	}
+}
+
+func TestAvatarUrlWithNewSha256(t *testing.T) {
+	otherG := Gravatar{
+		Hash: crypto.SHA256,
+	}
+
+	input := "derek@example.com"
+	expected := "https://gravatar.com/avatar/1036e289c73bef58564b6cf6f4f0c231fb8724fce8fc9642324264538902c580"
+	result := otherG.AvatarUrl(input)
+	if result != expected {
+		t.Errorf("For input (%s) we expected (%s), but actually got (%s).", input, expected, result)
+	}
+}
+
+func TestAvatarUrlWithBadHash(t *testing.T) {
+	otherG := Gravatar{
+		Hash: 9001,
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			t.Log("recovered from panic")
+		} else {
+			t.Error("expected to recover from panic")
+		}
+	}()
+
+	otherG.AvatarUrl("derek@example.com")
 }
