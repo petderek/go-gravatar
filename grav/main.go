@@ -7,14 +7,16 @@ import (
 	"os"
 
 	"io/ioutil"
+	"net/url"
 
 	. "github.com/petderek/go-gravatar"
 )
 
 var (
-	check = flag.Bool("check", false, "queries the service for existence. returns the url only if found. exits with (2) if not found.")
-	save  = flag.String("save", "", "save the photo saves the content to the filename specified. implies check")
-	size  = flag.Int("size", 0, "the optional size in pixels")
+	check  = flag.Bool("check", false, "queries the service for existence. returns the url only if found. exits with (2) if not found.")
+	save   = flag.String("save", "", "save the photo saves the content to the filename specified. implies check")
+	size   = flag.Int("size", 0, "the optional size in pixels")
+	domain = flag.String("domain", "", "the optional base domain to use instead of gravatar, such as http://cdn.libravatar.org")
 )
 
 // gravatar's api returns a silhouette by default. passing this arg forces a 404 if an image isn't found
@@ -27,12 +29,20 @@ func main() {
 		errlog(exitError, "expected first argument to be an email address.")
 	}
 
+	var location *url.URL
+	if *domain != "" {
+		u, err := url.Parse(*domain)
+		if err != nil {
+			errlog(exitError, "domain was invalid: ", err.Error())
+		}
+		location = u
+	}
+
 	g := &Gravatar{
 		Size:           *size,
 		DefaultPicture: respondWith404,
+		BaseDomain:     location,
 	}
-
-
 
 	result := g.AvatarUrl(flag.Arg(0))
 	if *check || *save != "" {
@@ -70,4 +80,5 @@ const (
 
 func errlog(exitcode int, msg ...string) {
 	fmt.Fprintln(os.Stderr, msg)
+	os.Exit(exitcode)
 }

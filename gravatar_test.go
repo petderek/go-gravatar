@@ -1,6 +1,9 @@
 package go_gravatar
 
-import "testing"
+import (
+	"testing"
+	"net/url"
+)
 
 var (
 	g Gravatar
@@ -39,6 +42,20 @@ func TestAvatarUrlWithParams(t *testing.T) {
 	}
 	input := "derek@example.com"
 	expected := "https://gravatar.com/avatar/eb23f498f9b14c0e73fd62708f3d2e97?d=404&s=200"
+	result := otherG.AvatarUrl(input)
+	if result != expected {
+		t.Errorf("For input (%s) we expected (%s), but actually got (%s).", input, expected, result)
+	}
+}
+
+func TestAvatarUrlWithNewBase(t *testing.T) {
+	domain, _ := url.Parse("https://example.com")
+	otherG := Gravatar {
+		BaseDomain: domain,
+	}
+
+	input := "derek@example.com"
+	expected := "https://example.com/avatar/eb23f498f9b14c0e73fd62708f3d2e97"
 	result := otherG.AvatarUrl(input)
 	if result != expected {
 		t.Errorf("For input (%s) we expected (%s), but actually got (%s).", input, expected, result)

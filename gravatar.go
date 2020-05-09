@@ -14,18 +14,19 @@ const (
 )
 
 var (
-	baseurl url.URL
+	defaultBaseUrl url.URL
 )
 
 func init() {
 	base, _ := url.Parse(gravatarWebsite)
-	baseurl = *base
+	defaultBaseUrl = *base
 }
 
 // Gravatar
 type Gravatar struct {
 	Size           int
 	DefaultPicture string
+	BaseDomain     *url.URL
 }
 
 // hash does the following:
@@ -45,7 +46,10 @@ func (g *Gravatar) HashString(email string) string {
 
 // AvatarUrl provides the avatar url for a given email
 func (g *Gravatar) AvatarUrl(email string) string {
-	loc := baseurl
+	loc := defaultBaseUrl
+	if g.BaseDomain != nil {
+		loc = *g.BaseDomain
+	}
 	loc.Path = fmt.Sprintf("/avatar/%x", g.hash([]byte(email)))
 
 	var values []string
